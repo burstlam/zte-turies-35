@@ -5422,7 +5422,6 @@ static noinline void reada_walk_down(struct btrfs_trans_handle *trans,
 	u64 generation;
 	u64 refs;
 	u64 flags;
-	u64 last = 0;
 	u32 nritems;
 	u32 blocksize;
 	struct btrfs_key key;
@@ -5490,7 +5489,6 @@ reada:
 					   generation);
 		if (ret)
 			break;
-		last = bytenr + blocksize;
 		nread++;
 	}
 	wc->reada_slot = slot;
