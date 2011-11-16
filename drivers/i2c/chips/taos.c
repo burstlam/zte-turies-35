@@ -232,7 +232,7 @@ static u8 filter_count_param = 1;
 static u8 gain_param = 1;
 
 #if defined(CONFIG_MACH_BLADE)
-static u16 gain_trim_param = 512;
+static u16 gain_trim_param = 100;
 #elif defined(CONFIG_MACH_JOE)
 static u16 gain_trim_param = 25;
 #elif defined(CONFIG_MACH_SKATE)
