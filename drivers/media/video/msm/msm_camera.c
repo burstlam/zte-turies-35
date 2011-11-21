@@ -46,6 +46,9 @@ spinlock_t pp_prev_spinlock;
 spinlock_t pp_snap_spinlock;
 spinlock_t pp_thumb_spinlock;
 
+#define MSM_MAX_CAMERA_SENSORS 5
+#define CAMERA_STOP_SNAPSHOT 42
+
 #define ERR_USER_COPY(to) pr_err("%s(%d): copy %s user\n", \
 				__func__, __LINE__, ((to) ? "to" : "from"))
 #define ERR_COPY_FROM_USER() ERR_USER_COPY(0)
