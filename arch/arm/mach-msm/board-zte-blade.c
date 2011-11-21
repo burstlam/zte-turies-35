@@ -1655,6 +1655,19 @@ static struct i2c_board_info i2c_devices[] = {
 #endif
 #endif
 
+//ZTE_CAM_GUOYANLING2011422
+#ifdef CONFIG_S5K5CAGX
+    /*
+     * add by ZTE_CAMERA_GUOYANLING_20110328 for S5K5CAGX-3.0Mp-AF-FPC
+     */
+#if !defined(CONFIG_SENSOR_ADAPTER)
+    {
+        I2C_BOARD_INFO("s5k5cagx", 0x78 >> 1),
+    },
+#else
+    //Do nothing
+#endif
+#endif
 
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_I2C_RMI
 {
