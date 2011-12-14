@@ -188,7 +188,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
 # Default value for CROSS_COMPILE is not to prefix executables
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
 export KBUILD_BUILDHOST := $(SUBARCH)
-ARCH		?= $(SUBARCH)
+ARCH		?= arm
 CROSS_COMPILE	?=
 CROSS_COMPILE	?= $(CONFIG_CROSS_COMPILE:"%"=%)
 
@@ -230,8 +230,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 
 HOSTCC       = gcc
 HOSTCXX      = g++
-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer -pipe
-HOSTCXXFLAGS = -O3 -pipe
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer
+HOSTCXXFLAGS = -O3
 
 # Decide whether to build built-in, modular, or both.
 # Normally, just do built-in.
@@ -332,12 +332,12 @@ CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void $(CF)
-MODFLAGS	= -O3 -march=armv6j -fomit-frame-pointer -pipe -ffast-math -mtune=arm1136jf-s -mfloat-abi=softfp -mfpu=vfp -DMODULE
+MODFLAGS	= -mfpu=vfp -DMODULE
 CFLAGS_MODULE   = $(MODFLAGS)
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -T $(srctree)/scripts/module-common.lds
-CFLAGS_KERNEL	= -O3 -march=armv6j -fomit-frame-pointer -pipe -ffast-math -mtune=arm1136jf-s -mfloat-abi=softfp -mfpu=vfp
-AFLAGS_KERNEL	= -O3 -march=armv6j -fomit-frame-pointer -pipe -ffast-math -mtune=arm1136jf-s -mfloat-abi=softfp -mfpu=vfp
+CFLAGS_KERNEL	= -O3 -fomit-frame-pointer -pipe -ffast-math -mtune=arm1136jf-s -mfloat-abi=softfp -fsingle-precision-constant -mfpu=vfp
+AFLAGS_KERNEL	= -O3 -fomit-frame-pointer -pipe -ffast-math -mtune=arm1136jf-s -mfloat-abi=softfp -fsingle-precision-constant -mfpu=vfp
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
 
@@ -353,7 +353,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-		   -fno-delete-null-pointer-checks -O3 -march=armv6j -fomit-frame-pointer -pipe -ffast-math -mtune=arm1136jf-s -mfloat-abi=softfp -mfpu=vfp
+		   -fno-delete-null-pointer-checks 
 KBUILD_AFLAGS   := -D__ASSEMBLY__
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
@@ -1507,3 +1507,4 @@ FORCE:
 # Declare the contents of the .PHONY variable as phony.  We keep that
 # information in a variable so we can use it in if_changed and friends.
 .PHONY: $(PHONY)
+
