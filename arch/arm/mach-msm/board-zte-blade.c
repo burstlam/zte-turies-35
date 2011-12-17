@@ -3386,7 +3386,7 @@ static struct mmc_platform_data msm7x2x_sdc1_data = {
 
 #ifdef CONFIG_MMC_MSM_SDC2_SUPPORT
 static struct mmc_platform_data msm7x2x_sdc2_data = {
-	.ocr_mask	= MMC_VDD_28_29,
+	.ocr_mask	= MMC_VDD_20_21,
 	.translate_vdd	= msm_sdcc_setup_power,
 	.mmc_bus_width  = MMC_CAP_4_BIT_DATA,
 #ifdef CONFIG_MMC_MSM_SDIO_SUPPORT
