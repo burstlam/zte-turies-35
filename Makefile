@@ -336,8 +336,8 @@ MODFLAGS	= -mfpu=vfp -DMODULE
 CFLAGS_MODULE   = $(MODFLAGS)
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -T $(srctree)/scripts/module-common.lds
-CFLAGS_KERNEL	= -O3 -fomit-frame-pointer -pipe -ffast-math -mtune=arm1136jf-s -mfloat-abi=softfp -fsingle-precision-constant -mfpu=vfp
-AFLAGS_KERNEL	= -O3 -fomit-frame-pointer -pipe -ffast-math -mtune=arm1136jf-s -mfloat-abi=softfp -fsingle-precision-constant -mfpu=vfp
+CFLAGS_KERNEL	= -Os -fomit-frame-pointer -pipe -ffast-math -mtune=arm1136jf-s -mfloat-abi=hard -fsingle-precision-constant -mfpu=vfp
+AFLAGS_KERNEL	= -Os -fomit-frame-pointer -pipe -ffast-math -mtune=arm1136jf-s -mfloat-abi=hard -fsingle-precision-constant -mfpu=vfp
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
 
