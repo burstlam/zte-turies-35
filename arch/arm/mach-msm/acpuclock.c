@@ -202,9 +202,9 @@ static struct clkctl_acpu_speed pll0_196_pll1_960_pll2_1200[] = {
 /* 7x27 normal with GSM capable modem - PLL0 and PLL1 swapped */
 static struct clkctl_acpu_speed pll0_960_pll1_245_pll2_1200[] = {
 	{ 0, 19200, ACPU_PLL_TCXO, 0, 0, 19200, 0, 0, 30720 },
-	{ 0, 120000, ACPU_PLL_0, 4, 7,  60000, 1, 0,  61440 },
+	{ 1, 120000, ACPU_PLL_0, 4, 7,  60000, 1, 0,  61440 },
 	{ 1, 122880, ACPU_PLL_1, 1, 1,  61440, 1, 0,  61440 },
-	{ 0, 200000, ACPU_PLL_2, 2, 5,  66667, 2, 2,  61440 },
+	{ 1, 200000, ACPU_PLL_2, 2, 5,  66667, 2, 1,  61440 },
 	{ 1, 245760, ACPU_PLL_1, 1, 0, 122880, 1, 2,  61440 },
 	{ 1, 320000, ACPU_PLL_0, 4, 2, 160000, 1, 3, 122880 },
 #ifndef CONFIG_MSM_CPU_FREQ_OVERCLOCK_AHB
