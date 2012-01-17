@@ -120,7 +120,6 @@ extern struct atmel_i2c_platform_data atmel_data;
 #ifdef CONFIG_ARCH_MSM7X25
 #define MSM_PMEM_MDP_SIZE	0xb21000
 #define MSM_PMEM_ADSP_SIZE	0x97b000
-#define MSM_PMEM_AUDIO_SIZE	0x121000
 #define MSM_FB_SIZE		0x200000
 #define PMEM_KERNEL_EBI1_SIZE	0x64000
 #endif
@@ -128,7 +127,6 @@ extern struct atmel_i2c_platform_data atmel_data;
 #ifdef CONFIG_ARCH_MSM7X27
 #define MSM_PMEM_MDP_SIZE	0x1B76000
 #define MSM_PMEM_ADSP_SIZE	0xAE4000
-#define MSM_PMEM_AUDIO_SIZE	0x5B000
 #define MSM_FB_SIZE		0x177000
 #define MSM_GPU_PHYS_SIZE	SZ_2M
 #define PMEM_KERNEL_EBI1_SIZE	0x1C000
@@ -147,10 +145,6 @@ static smem_global *global;
 #ifdef CONFIG_ZTE_PLATFORM
 static int g_zte_ftm_flag_fixup;
 #endif
-
-
-/* Using upper 1/2MB of Apps Bootloader memory*/
-#define MSM_PMEM_AUDIO_START_ADDR	0x80000ul
 
 static struct resource smc91x_resources[] = {
 	[0] = {
@@ -894,12 +888,6 @@ static struct android_pmem_platform_data android_pmem_adsp_pdata = {
 	.cached = 0,
 };
 
-static struct android_pmem_platform_data android_pmem_audio_pdata = {
-	.name = "pmem_audio",
-	.allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
-	.cached = 0,
-};
-
 static struct platform_device android_pmem_device = {
 	.name = "android_pmem",
 	.id = 0,
@@ -910,12 +898,6 @@ static struct platform_device android_pmem_adsp_device = {
 	.name = "android_pmem",
 	.id = 1,
 	.dev = { .platform_data = &android_pmem_adsp_pdata },
-};
-
-static struct platform_device android_pmem_audio_device = {
-	.name = "android_pmem",
-	.id = 2,
-	.dev = { .platform_data = &android_pmem_audio_pdata },
 };
 
 static struct platform_device android_pmem_kernel_ebi1_device = {
@@ -3003,7 +2985,6 @@ static struct platform_device *devices[] __initdata = {
 	&android_pmem_kernel_ebi1_device,
 	&android_pmem_device,
 	&android_pmem_adsp_device,
-	&android_pmem_audio_device,
 	&msm_fb_device,
 #ifdef CONFIG_ZTE_PLATFORM
 	&lcdc_qvga_panel_device,
@@ -3975,12 +3956,6 @@ static void __init msm_msm7x2x_allocate_memory_regions(void)
 		pr_info("allocating %lu bytes at %p (%lx physical) for adsp "
 			"pmem arena\n", size, addr, __pa(addr));
 	}
-
-	size = MSM_PMEM_AUDIO_SIZE ;
-	android_pmem_audio_pdata.start = MSM_PMEM_AUDIO_START_ADDR ;
-	android_pmem_audio_pdata.size = size;
-	pr_info("allocating %lu bytes (at %lx physical) for audio "
-		"pmem arena\n", size , MSM_PMEM_AUDIO_START_ADDR);
 
 	size = fb_size ? : MSM_FB_SIZE;
 	addr = alloc_bootmem(size);
