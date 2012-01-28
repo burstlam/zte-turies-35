@@ -1655,6 +1655,16 @@ static struct i2c_board_info i2c_devices[] = {
 #endif
 #endif
 
+#ifdef CONFIG_OV5640
+#if !defined(CONFIG_SENSOR_ADAPTER)
+    {
+        I2C_BOARD_INFO("ov5640", 0x78 >> 1),
+    },
+#else
+    //Do nothing
+#endif
+#endif
+
 //ZTE_CAM_GUOYANLING2011422
 #ifdef CONFIG_S5K5CAGX
     /*
@@ -2792,9 +2802,31 @@ static struct platform_device msm_camera_sensor_ov5642 = {
 };
 #endif
 
+#ifdef CONFIG_OV5640
+static struct msm_camera_sensor_flash_data flash_ov5640 = {
+	.flash_type = MSM_CAMERA_FLASH_LED,
+	.flash_src  = &msm_flash_src
+};
+ 
+static struct msm_camera_sensor_info msm_camera_sensor_ov5640_data = {
+	.sensor_name    = "ov5640",
+	.sensor_reset   = 2,
+	.sensor_pwd     = 1,
+	.vcm_pwd        = 0,
+	.vcm_enable     = 0,
+	.pdata          = &msm_camera_device_data,
+	.flash_data     = &flash_ov5640
+};
+
+static struct platform_device msm_camera_sensor_ov5640 = {
+	.name      = "msm_camera_ov5640",
+	.dev       = {
+		.platform_data = &msm_camera_sensor_ov5640_data,
+	},
+};
 #endif
 
-
+#endif
 
 /*add touchsreen size definition for mooncake.  QVGA*/
 #if defined( CONFIG_TOUCHSCREEN_MSM_LEGACY)
@@ -3088,6 +3120,10 @@ static struct platform_device *devices[] __initdata = {
      * For OV5642: 5.0Mp, 1/4-Inch System-On-A-Chip (SOC) CMOS Digital Image Sensor
      */
     &msm_camera_sensor_ov5642,
+#endif
+
+#ifdef CONFIG_OV5640
+    &msm_camera_sensor_ov5640,
 #endif
 
 #ifdef CONFIG_S5K5CAGX
