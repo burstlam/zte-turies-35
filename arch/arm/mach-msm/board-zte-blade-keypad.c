@@ -15,9 +15,9 @@
 /* ========================================================================================
 when             who             what, where, why                                                                            comment tag
 ---------     -------       -------------------------------------------------------     --------------------------
-2010-05-20   weilanying   blade_keypad          ZTE_KEYPAD_WLY_0520
+2010-05-20   weilanying   修改blade_keypad名称          ZTE_KEYPAD_WLY_0520
 2010-04-02   zhangtao     modified the keypad map			  ZTE_KEYPAD_ZT_20100402_001
-2010-03-23   jiangfeng     BLADE core                         
+2010-03-23   jiangfeng     增加BLADE core支持                         
 2009-12-11     wly         support ftm mode                          ZTE_FTM_MODE_WLY_001
 2009-10-30   qhhuang       Copy from board-raise-keypad and modify "raise" to "mooncake" to support mooncake keypad      
 =========================================================================================*/
@@ -29,13 +29,12 @@ when             who             what, where, why                               
 
 
 static unsigned int keypad_row_gpios[] = {33, 28}; 
-
 static unsigned int keypad_col_gpios[] = {37, 41, 40}; 
 
 #define KEYMAP_INDEX(row, col) ((row)*ARRAY_SIZE(keypad_col_gpios) + (col))
 
 
-static const unsigned short keypad_keymap_mooncake[ARRAY_SIZE(keypad_col_gpios) *
+static const unsigned short keypad_keymap_blade[ARRAY_SIZE(keypad_col_gpios) *
 					      ARRAY_SIZE(keypad_row_gpios)] = {
 	/*                       row, col   */
 	[KEYMAP_INDEX(0, 0)] = KEY_BACK, 
@@ -47,12 +46,13 @@ static const unsigned short keypad_keymap_mooncake[ARRAY_SIZE(keypad_col_gpios) 
 };
 
 
-static const unsigned short mooncake_keypad_virtual_keys[] = {
+static const unsigned short blade_keypad_virtual_keys[] = {
 	KEY_END,
 	KEY_POWER
 };
 
 #ifdef CONFIG_MSM_GPIO_WAKE
+//LHX_PM_20110506_01 get which GPIO for BACK HOME MENU------>>
 const unsigned short *p_keypad_keymap;
 void zte_get_gpio_for_key(int *keycode)
 {
@@ -65,18 +65,26 @@ void zte_get_gpio_for_key(int *keycode)
 	{
 		keymap_index ++;
 	}
+	
+	//pr_info("[IRQWAKE]  keymap_index %d\n",keymap_index);
+	
 	do{
 		gpio_wakeup_col =  keymap_index - r * col_array_size;
 		r++;
 	}while(gpio_wakeup_col > col_array_size);
+	
+	//pr_info("[IRQWAKE]  gpio_col %d\n",gpio_wakeup_col);
 	*keycode = keypad_col_gpios[gpio_wakeup_col];
 	pr_info("[IRQWAKE]  wakeup gpio_num %d\n",*keycode);
+	
 }
+
+//<<------LHX_PM_20110506_01 get which GPIO for BACK HOME MENU
 #endif
-/* mooncake keypad platform device information */
-static struct gpio_event_matrix_info mooncake_keypad_matrix_info = {
+/* blade keypad platform device information */
+static struct gpio_event_matrix_info blade_keypad_matrix_info = {
 	.info.func	= gpio_event_matrix_func,
-	.keymap		= keypad_keymap_mooncake,
+	.keymap		= keypad_keymap_blade,
 	.output_gpios	= keypad_row_gpios,
 	.input_gpios	= keypad_col_gpios,
 	.noutputs	= ARRAY_SIZE(keypad_row_gpios),
@@ -91,42 +99,44 @@ static struct gpio_event_matrix_info mooncake_keypad_matrix_info = {
 #endif
 };
 
-static struct gpio_event_info *mooncake_keypad_info[] = {
-	&mooncake_keypad_matrix_info.info
+static struct gpio_event_info *blade_keypad_info[] = {
+	&blade_keypad_matrix_info.info
 };
 
-static struct gpio_event_platform_data mooncake_keypad_data = {
-	.name		= "blade_keypad",  
-	.info		= mooncake_keypad_info,
-	.info_count	= ARRAY_SIZE(mooncake_keypad_info)
+static struct gpio_event_platform_data blade_keypad_data = {
+	.name		= "blade_keypad",
+	.info		= blade_keypad_info,
+	.info_count	= ARRAY_SIZE(blade_keypad_info)
 };
 
-struct platform_device keypad_device_mooncake = {
+struct platform_device keypad_device_blade = {
 	.name	= GPIO_EVENT_DEV_NAME,
 	.id	= -1,
 	.dev	= {
-		.platform_data	= &mooncake_keypad_data,
+		.platform_data	= &blade_keypad_data,
 	},
 };
 
+/* ZTE_FTM_MODE_WLY_001, @2009-12-11, START*/
 #ifdef CONFIG_ZTE_FTM_FLAG_SUPPORT
 extern int zte_get_ftm_flag(void);
 #endif
-
-static int __init mooncake_init_keypad(void)
+/* ZTE_FTM_MODE_WLY_001, @2009-12-11, END*/
+static int __init blade_init_keypad(void)
 {
-        
+        /* ZTE_FTM_MODE_WLY_001, @2009-12-11, START*/
 	#ifdef CONFIG_ZTE_FTM_FLAG_SUPPORT
 	int ftm_flag;
 	ftm_flag = zte_get_ftm_flag();
 	if (1 ==ftm_flag)return 0;
 	#endif
-        
-	mooncake_keypad_matrix_info.keymap = keypad_keymap_mooncake;
+        /* ZTE_FTM_MODE_WLY_001, @2009-12-11, START*/
+	blade_keypad_matrix_info.keymap = keypad_keymap_blade;
 #ifdef CONFIG_MSM_GPIO_WAKE
-	p_keypad_keymap = mooncake_keypad_matrix_info.keymap;	
+	p_keypad_keymap = blade_keypad_matrix_info.keymap;	//LHX_PM_20110506_01 get which GPIO for BACK HOME MENU
 #endif
-	return platform_device_register(&keypad_device_mooncake);
+	return platform_device_register(&keypad_device_blade);
 }
 
-device_initcall(mooncake_init_keypad);
+device_initcall(blade_init_keypad);
+
