@@ -48,7 +48,4 @@ void release_axi_qos(void)
 
 	clk_disable(ebi1_clk);
 	clk_put(ebi1_clk);
-	
-    //lijing modify for high current,merged from patch CRs-Fixed: 280060,ZTE_CAM_20110810
-    ebi1_clk = NULL;
 }

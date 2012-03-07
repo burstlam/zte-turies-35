@@ -216,7 +216,6 @@ static ssize_t msm_pm_mode_attr_show(
 
 		break;
 	}
-
 	if (ret > 0) {
 		strcat(buf, "\n");
 		ret++;
@@ -986,7 +985,10 @@ void zte_update_lateresume_2_earlysuspend_time(bool resume_or_earlysuspend)	// L
 	}
 }
 
-extern unsigned pm_modem_sleep_time_get(void);
+unsigned pm_modem_sleep_time_get(void)
+{
+	return  0;
+	}
 /*BEGIN LHX_PM_20110324_01 add code to record how long the APP sleeps or keeps awake*/
 struct timespec time_updated_when_sleep_awake;
 void record_sleep_awake_time(bool record_sleep_awake)
@@ -1837,12 +1839,8 @@ static uint32_t restart_reason = 0x776655AA;
 
 static void msm_pm_power_off(void)
 {
-	unsigned int subid=14;
 	msm_rpcrouter_close();
-	printk("msm_pm_power_off, set pwrdwn flag\n");
-	msm_proc_comm(PCOM_CUSTOMER_CMD3,0, &subid);
 	msm_proc_comm(PCOM_POWER_DOWN, 0, 0);
-	printk("msm_pm_power_off, waiting POWEROFF\n");
 	for (;;)
 		;
 }

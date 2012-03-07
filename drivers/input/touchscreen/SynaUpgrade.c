@@ -5,13 +5,7 @@
 #include <linux/delay.h>
 
 #include <linux/file.h>
-#include <asm/uaccess.h>
 
-#include <linux/fs.h>
-#include <linux/fb.h>
-
-
-static struct i2c_client *syna_i2c_client;
 
 unsigned char Firmware_Image[16000];  // make smaller and dynamic
 unsigned char Config_Image[16000];  // make smaller and dynamic
@@ -21,6 +15,7 @@ unsigned char status;
 unsigned long firmware_imgsize;
 unsigned char firmware_imgver;
 unsigned long config_imgsize;
+unsigned long filesize;
 unsigned int synaptics_bootload_id;
 
 unsigned char *firmware_imgdata;
@@ -73,7 +68,7 @@ bool  unconfigured;
 struct rmi4_function_descriptor f34_func_des;
 struct rmi4_function_descriptor f01_func_des;
 
-static bool synaptics_read_flash_property(struct i2c_client *client)
+bool synaptics_read_flash_property(struct i2c_client *client)
 {
 	int ret = 0;
 	ret = i2c_smbus_read_i2c_block_data(client, f34_reflash_query_flashpropertyquery, 1, &page_data[0]);
@@ -87,7 +82,7 @@ static bool synaptics_read_flash_property(struct i2c_client *client)
 }
 
 //Func34 has 2 models, we should make sure which model the TP used
-static void synaptics_set_flash_addr(struct i2c_client *client)
+void synaptics_set_flash_addr(struct i2c_client *client)
 {
 	if (synaptics_read_flash_property(client)){
 		pr_info("Flash Property  1\n");
@@ -101,7 +96,7 @@ static void synaptics_set_flash_addr(struct i2c_client *client)
 	}
 }
 
-static int synaptics_get_pgt_f34(struct i2c_client *client)
+int synaptics_get_pgt_f34(struct i2c_client *client)
 {
 #if 0
 	int ret = 0;
@@ -184,7 +179,7 @@ for(uAddress = 0xe9; uAddress > 10; uAddress -= sizeof(struct rmi4_function_desc
 	return 0;
 }
 
-static int synaptics_read_bootload_id(struct i2c_client *client)
+int synaptics_read_bootload_id(struct i2c_client *client)
 {
 	int ret = 0;
 	char data[2];
@@ -201,7 +196,7 @@ static int synaptics_read_bootload_id(struct i2c_client *client)
 	return 0;
 }
 
-static int synaptics_write_bootload_id(struct i2c_client *client)
+int synaptics_write_bootload_id(struct i2c_client *client)
 {
 	int ret = 0;
 	unsigned char data[2];
@@ -222,7 +217,7 @@ static int synaptics_write_bootload_id(struct i2c_client *client)
 
 
 //Check wether the TP support F34 and try to enter bootload mode
-static void synaptics_write_page(struct i2c_client *client)
+void synaptics_write_page(struct i2c_client *client)
 {
 	int ret = 0;
 	unsigned char upage = 0x00;
@@ -292,12 +287,12 @@ static void synaptics_write_page(struct i2c_client *client)
 	pr_info("%s: StatusCode: 0x%x \n", __func__, f01_rmi_data[0] & 0x0f );
 }
 
-static int synaptics_enable_flash_command(struct i2c_client *client)
+int synaptics_enable_flash_command(struct i2c_client *client)
 {
   return i2c_smbus_write_i2c_block_data(client, f34_reflash_flashcontrol, 1, (unsigned char *)&f34_reflash_cmd_enable);
 }
 
-static void synaptics_enable_flash(struct i2c_client *client)
+void synaptics_enable_flash(struct i2c_client *client)
 {
 	unsigned char data[2]={0,0};
 	int ret = 0;
@@ -380,7 +375,7 @@ static void synaptics_enable_flash(struct i2c_client *client)
 }
 
 
-static unsigned long synaptics_extract_long_from_header(const unsigned char* SynaImage)  // Endian agnostic
+unsigned long synaptics_extract_long_from_header(const unsigned char* SynaImage)  // Endian agnostic
 {
   return((unsigned long)SynaImage[0] +
          (unsigned long)SynaImage[1]*0x100 +
@@ -388,7 +383,7 @@ static unsigned long synaptics_extract_long_from_header(const unsigned char* Syn
          (unsigned long)SynaImage[3]*0x1000000);
 }
 
-static void synaptics_read_config_info(struct i2c_client *client)
+void synaptics_read_config_info(struct i2c_client *client)
 {
   unsigned char data[2];
   int ret;
@@ -414,7 +409,7 @@ static void synaptics_read_config_info(struct i2c_client *client)
   config_imgsize = config_blocksize*config_blockcount;
 }
 
-static void synaptics_read_firmware_info(struct i2c_client *client)
+void synaptics_read_firmware_info(struct i2c_client *client)
 {
 	unsigned char data[2];
 	int ret;
@@ -440,7 +435,7 @@ static void synaptics_read_firmware_info(struct i2c_client *client)
 }
 
 
-static void synaptics_cal_checksum(unsigned short * data, unsigned short len, unsigned long * dataBlock)
+void synaptics_cal_checksum(unsigned short * data, unsigned short len, unsigned long * dataBlock)
 {
   unsigned long temp = *data++;
   unsigned long sum1;
@@ -462,27 +457,24 @@ static void synaptics_cal_checksum(unsigned short * data, unsigned short len, un
   *dataBlock = sum2 << 16 | sum1;
 }
 
-static unsigned short synaptics_get_frimware_size(void)
+unsigned short synaptics_get_frimware_size(void)
 {
   return firmware_blocksize * firmware_blockcount;
 }
 
-static unsigned short synaptics_get_config_size(void)
+unsigned short synaptics_get_config_size(void)
 {
   return config_blocksize * config_blockcount;
 }
 
-#if 0
 //Go to a endless circule if config or firmware sizes dismatch here.
-static void synaptics_read_firmware_header(struct i2c_client *client
-	byte *pfwfile, unsigned long filesize)
+void synaptics_read_firmware_header(struct i2c_client *client)
 {
 	unsigned long check_sum;
 	//unsigned char data;
 	int ret;
-	//unsigned long filesize;
 	
-	//filesize = sizeof(SynaFirmware) -1;
+	filesize = sizeof(SynaFirmware) -1;
 
 	pr_info("\n%s:Scanning SynaFirmware[], header file - len = %ld \n\n", __func__, filesize);
 
@@ -534,74 +526,8 @@ static void synaptics_read_firmware_header(struct i2c_client *client
 	}
 	return;
 }
-#else
-static void synaptics_read_firmware_header( struct i2c_client *client,u8 *pfwfile, u32 filesize)
-{
-	unsigned long check_sum;
-	//unsigned char data;
-	int ret;
-	//unsigned long filesize;
 
-	if ( pfwfile == NULL ){
-		printk("xiayc, invalid param!\n");
-		return;
-	}
-	filesize = sizeof(SynaFirmware) -1;
-
-	pr_info("\n%s:Scanning SynaFirmware[], header file - len = %d \n\n", __func__, filesize);
-
-	check_sum = synaptics_extract_long_from_header(&(pfwfile[0]));
-	synaptics_bootload_imgid = (unsigned int)pfwfile[4] + (unsigned int)pfwfile[5]*0x100;
-	firmware_imgver = pfwfile[7];
-	firmware_imgsize = synaptics_extract_long_from_header(&(pfwfile[8]));
-	config_imgsize = synaptics_extract_long_from_header(&(pfwfile[12]));
-	
-	pr_info("%s: Target = %s, ", __func__, &pfwfile[16]);
-	pr_info("Cksum = 0x%ld, Id = 0x%d, Ver = %d, FwSize = 0x%ld, ConfigSize = 0x%ld \n",
-	check_sum, synaptics_bootload_imgid, firmware_imgver, firmware_imgsize, config_imgsize);
-
-	 // Determine firmware organization - read firmware block size and firmware size
-	synaptics_read_firmware_info(client);  
-
-	synaptics_cal_checksum((unsigned short*)&(pfwfile[4]), (unsigned short)(filesize-4)>>1,
-						&firmware_imgchecksum);
-
-	if (filesize != (0x100+firmware_imgsize+config_imgsize))
-	{
-		pr_err("%s: Error--SynaFirmware[] size = %d, expected %ld\n", __func__, filesize, (0x100+firmware_imgsize+config_imgsize));
-		while(1);
-	}
-
-	if (firmware_imgsize != synaptics_get_frimware_size())
-	{
-		pr_err("%s: Firmware image size verfication failed!\n", __func__);
-		pr_err("\tsize in image %ld did not match device size %d\n", firmware_imgsize, synaptics_get_frimware_size());
-		while(1);
-	}
-
-	if (config_imgsize != synaptics_get_config_size())
-	{
-		pr_err("%s: Configuration size verfication failed!\n", __func__);
-		pr_err("\tsize in image %ld did not match device size %d\n", config_imgsize, synaptics_get_config_size());
-		while(1);
-	}
-
-	firmware_imgdata=(unsigned char *)((&pfwfile[0])+0x100);
-
-	// memcpy(m_firmwareImgData, (&SynaFirmware[0])+0x100, firmware_imgsize);
-	memcpy(config_imgdata,   (&pfwfile[0])+0x100+firmware_imgsize, config_imgsize);
-
-	ret = i2c_smbus_read_i2c_block_data(client, f34_reflash_flashcontrol, 1, &page_data[0]);
-	if(0 > ret){
-		pr_err("%s: Read Func34 flash control err!\n", __func__);
-		return ;
-	}
-	return;
-}
-
-#endif
-
-static bool synaptics_validate_bootload_id(unsigned short bootloadID, struct i2c_client *client)
+bool synaptics_validate_bootload_id(unsigned short bootloadID, struct i2c_client *client)
 {
 	int ret = 0;
 	pr_info("%s: called!\n", __func__);
@@ -617,7 +543,7 @@ static bool synaptics_validate_bootload_id(unsigned short bootloadID, struct i2c
 	return firmware_imgver != 0 || bootloadID == synaptics_bootload_id;
 }
 
-static int synaptics_issue_erase_cmd(unsigned char *command, struct i2c_client *client)
+int synaptics_issue_erase_cmd(unsigned char *command, struct i2c_client *client)
 {
   int ret;
   // command = 3 - erase all; command = 7 - erase config
@@ -626,7 +552,7 @@ static int synaptics_issue_erase_cmd(unsigned char *command, struct i2c_client *
   return ret;
 }
 
-static int synaptics_flash_firmware_write(struct i2c_client *client)
+int synaptics_flash_firmware_write(struct i2c_client *client)
 {
 	unsigned char *buf_firmware_data = firmware_imgdata;
 	unsigned char data[2];
@@ -680,7 +606,7 @@ static int synaptics_flash_firmware_write(struct i2c_client *client)
 	return 0;
 }
 
-static void synaptics_prog_firmware(struct i2c_client *client)
+void synaptics_prog_firmware(struct i2c_client *client)
 {
 	int ret;
 	unsigned char data[1];
@@ -721,7 +647,7 @@ static void synaptics_prog_firmware(struct i2c_client *client)
 	}
 }
 
-static int synaptics_issue_flash_ctl_cmd(struct i2c_client *client, unsigned char *command)
+int synaptics_issue_flash_ctl_cmd(struct i2c_client *client, unsigned char *command)
 {
 	int ret;
 	ret = i2c_smbus_write_byte_data(client, f34_reflash_flashcontrol, *command);
@@ -729,7 +655,7 @@ static int synaptics_issue_flash_ctl_cmd(struct i2c_client *client, unsigned cha
 	return ret;
 }
 
-static void synaptics_prog_configuration(struct i2c_client *client)
+void synaptics_prog_configuration(struct i2c_client *client)
 {
 	int ret = 0;
 	unsigned char data[2];
@@ -780,7 +706,7 @@ static void synaptics_prog_configuration(struct i2c_client *client)
 	}
 }
 
-static void synaptics_reset_device(struct i2c_client *client)
+void synaptics_reset_device(struct i2c_client *client)
 {
 	int ret = 0;
 	unsigned char data[1];
@@ -793,7 +719,7 @@ static void synaptics_reset_device(struct i2c_client *client)
 	}
 }
 
-static int synaptics_disenable_flash(struct i2c_client *client)
+int synaptics_disenable_flash(struct i2c_client *client)
 {
 	int ret = 0;
 	unsigned char data[2];
@@ -854,7 +780,7 @@ static int synaptics_disenable_flash(struct i2c_client *client)
 }
 
 //函数功能为触摸屏通断电
-static void syna_power_on_off(struct i2c_client *client,int on_off)
+void syna_power_on_off(struct i2c_client *client,int on_off)
 {
 	//
 	//int(* power)(int on);
@@ -863,7 +789,7 @@ static void syna_power_on_off(struct i2c_client *client,int on_off)
 	gpio_direction_output(31, on_off);
 }
 unsigned short i2c_address;
-static void syna_i2c_init(struct i2c_client *client)
+void syna_i2c_init(struct i2c_client *client)
 {
 	//i2c_address=client->addr;//temp
 	syna_power_on_off(client,0);
@@ -873,9 +799,7 @@ static void syna_i2c_init(struct i2c_client *client)
 	//RMI4WritePage();
 	synaptics_write_page(client);
 }
-
-
-static void syna_rmi4_init(struct i2c_client *client)
+void syna_rmi4_init(struct i2c_client *client)
 {
 /*
 	// Set up blockSize and blockCount for UI and config
@@ -891,103 +815,6 @@ static void syna_rmi4_init(struct i2c_client *client)
 	firmware_imgdata=&Firmware_Image[0];
 	config_imgdata = &Config_Image[0];
 }
-
-
-static int syna_getfwsize(char * firmware_name)
-{
-	struct file* pfile = NULL;
-	struct inode *inode;
-	unsigned long magic; 
-	off_t fsize = 0; 
-	char filepath[128];
-
-	memset(filepath, 0, sizeof(filepath));
-	sprintf(filepath, "/sdcard/%s", firmware_name);
-	pr_info("filepath=%s\n", filepath);
-	if(NULL == pfile){
-		pfile = filp_open(filepath, O_RDONLY, 0);
-	}
-	if(IS_ERR(pfile)){
-		pr_err("error occured while opening file %s.\n", filepath);
-		return -1;
-	}
-
-	inode=pfile->f_dentry->d_inode; 
-	magic=inode->i_sb->s_magic;
-	fsize=inode->i_size; 
-
-	filp_close(pfile, NULL);
-
-	return fsize;
-}
-
-static int syna_getfwinfo(char * firmware_name, unsigned char * firmware_buf)
-{
-	struct file* pfile = NULL;
-	struct inode *inode;
-	unsigned long magic; 
-	off_t fsize; 
-	char filepath[128];
-	loff_t pos;
-	mm_segment_t old_fs;
-
-	memset(filepath, 0, sizeof(filepath));
-	sprintf(filepath, "/sdcard/%s", firmware_name);
-	pr_info("filepath=%s\n", filepath);
-	if(NULL == pfile){
-		pfile = filp_open(filepath, O_RDONLY, 0);
-	}
-	if(IS_ERR(pfile)){
-		pr_err("error occured while opening file %s.\n", filepath);
-		return -1;
-		}
-	inode=pfile->f_dentry->d_inode; 
-	magic=inode->i_sb->s_magic;
-	fsize=inode->i_size; 
-	//char * buf;
-	old_fs = get_fs();
-	set_fs(KERNEL_DS);
-	pos = 0;
-
-	vfs_read(pfile, firmware_buf, fsize, &pos);
-
-	filp_close(pfile, NULL);
-	set_fs(old_fs);
-	return 0;
-}
-
-static void syna_fw_update(struct i2c_client *client,
-	u8 *pfwfile, u32 fwsize)
-{
-	//原函数中的初始化，暂时看来没有什么用处
-	//RMI4FuncsConstructor();
-	
-	//初始化i2c等
-	//RMI4RMIInit(protocolType, (unsigned char)i2c_address, attn, byte_delay, bit_rate, time_out);
-	//RMI4Init();
-	syna_i2c_init(client);
-	syna_rmi4_init(client);
-
-	synaptics_set_flash_addr(client);
-	//前面准备工作完毕，开始programming流程
-	synaptics_enable_flash(client);
-
-	//这个函数功能暂时不要所需的数组已经用其他方法取得
-	//SynaConvertFirmwareImageToCHeaderFile(ImgFile);  // this is just a utility to generate a header file.
-
-	synaptics_read_firmware_header(client, pfwfile, fwsize);
-	synaptics_prog_firmware(client);
-	synaptics_prog_configuration(client);
-
-	synaptics_disenable_flash(client);
-	
-	//这里建议重启触摸屏
-	//EndControlBridge();
-	syna_power_on_off(client,0);
-	msleep(500);
-	syna_power_on_off(client,1);
-}
-
 #if 0
 void Synaptics_Convert_FirmwareImage_To_CHeaderFile(void)
 {
@@ -1019,122 +846,36 @@ void Synaptics_Convert_FirmwareImage_To_CHeaderFile(void)
 
 }
 #endif
-static ssize_t syna_fwupdate_show(struct device *dev,
-				struct device_attribute *attr, char *buf)
+
+void ioctol(struct i2c_client *client)
 {
-	/* place holder for future use */
-    return -EPERM;
-}
-
-//upgrade from app.bin
-static ssize_t syna_fwupdate_store(struct device *dev,
-					struct device_attribute *attr,
-						const char *buf, size_t count)
-{
-  	u8*   pbt_buf = 0;
-//   	int i_ret; //u8 fwver;
-   	int fwsize;
-	char fwname[128];
-	struct i2c_client *client = syna_i2c_client;
-
-
-	memset(fwname, 0, sizeof(fwname));
-	sprintf(fwname, "%s", buf);
-	fwname[count-1] = '\0';
-
-
-	fwsize = syna_getfwsize(fwname);
-   	if(fwsize <= 0)
-   	{
-   		pr_err("%s ERROR:Get firmware size failed\n", __FUNCTION__);
-		return -1;
-   	}
+	//原函数中的初始化，暂时看来没有什么用处
+	//RMI4FuncsConstructor();
 	
-    //   FW upgrade begin
-  	 pbt_buf = (unsigned char *) kmalloc(fwsize+1,GFP_ATOMIC);
-	if(syna_getfwinfo(fwname, pbt_buf))
-    {
-       	pr_err("%s() - ERROR: request_firmware failed\n", __FUNCTION__);
-        kfree(pbt_buf);
-		return -1;
-    }
+	//初始化i2c等
+	//RMI4RMIInit(protocolType, (unsigned char)i2c_address, attn, byte_delay, bit_rate, time_out);
+	//RMI4Init();
+	syna_i2c_init(client);
+	syna_rmi4_init(client);
 
+	synaptics_set_flash_addr(client);
+	//前面准备工作完毕，开始programming流程
+	synaptics_enable_flash(client);
 
-	syna_fw_update( client, pbt_buf, fwsize);
-	return count;
-}
+	//这个函数功能暂时不要所需的数组已经用其他方法取得
+	//SynaConvertFirmwareImageToCHeaderFile(ImgFile);  // this is just a utility to generate a header file.
 
-static DEVICE_ATTR(synafwupdate, S_IRUGO|S_IWUSR, syna_fwupdate_show, syna_fwupdate_store);
+	synaptics_read_firmware_header(client);
+	synaptics_prog_firmware(client);
+	synaptics_prog_configuration(client);
 
-//void ioctol(struct i2c_client *client)
-extern struct kobject *firmware_kobj;
-
-void syna_fwupdate(void) 
-{
-	struct i2c_client *client = syna_i2c_client;
-
-/*
-	byte *pfw;
-	uint fwsize;
-
-	pfw = (byte *)SynaFirmware;
-	fwsize = sizeof(SynaFirmware) -1;
-	syna_fw_update(client, pfw, fwsize);
-*/
-
-	syna_fw_update( client, (u8 *)SynaFirmware,sizeof(SynaFirmware));
-
-}
-
-
-int syna_fwupdate_init(struct i2c_client *client)
-{
-	int ret;
-	struct kobject * fts_fw_kobj=NULL;
-
-	fts_fw_kobj = kobject_get(firmware_kobj);
-	if (fts_fw_kobj == NULL) {
-		fts_fw_kobj = kobject_create_and_add("firmware", NULL);
-		if (fts_fw_kobj == NULL) {
-			pr_err("%s: subsystem_register failed\n", __func__);
-			ret = -ENOMEM;
-			return ret;
-		}
-	}
- 
-	ret=sysfs_create_file(fts_fw_kobj, &dev_attr_synafwupdate.attr);
-	if (ret) {
-		pr_err("%s: sysfs_create_file failed\n", __func__);
-		return ret;
-	}
-	syna_i2c_client = client;
-	printk("%s, xiayc: client=%p syna_i2c_client=%p\n",__func__,client,syna_i2c_client);
-
-	pr_info("%s:fts firmware update init succeed!\n", __func__);
-	return 0;
-
-
-	if (!client)
-		syna_i2c_client = client;
-}
-
-
-int syna_fwupdate_deinit(struct i2c_client *client)
-{
-	struct kobject * fts_fw_kobj=NULL;
-
-	fts_fw_kobj = kobject_get(firmware_kobj);
-	if ( !firmware_kobj ){
-		printk("%s: error get kobject\n", __func__);
-		return -1;
-	}
+	synaptics_disenable_flash(client);
 	
-	sysfs_remove_file(firmware_kobj, &dev_attr_synafwupdate.attr);
-	//	kobject_del(virtual_key_kobj);
-
-	return 0;
+	//这里建议重启触摸屏
+	//EndControlBridge();
+	syna_power_on_off(client,0);
+	msleep(500);
+	syna_power_on_off(client,1);
 }
-
-
 
 
