@@ -12,8 +12,8 @@
  * lookup3.c, by Bob Jenkins, May 2006, Public Domain.
  *
  * These are functions for producing 32-bit hashes for hash table lookup.
- * hashword(), hashlittle(), hashlittle2(), hashbig(), mix(), and final() 
- * are externally useful functions.  Routines to test the hash are included 
+ * hashword(), hashlittle(), hashlittle2(), hashbig(), mix(), and final()
+ * are externally useful functions.  Routines to test the hash are included
  * if SELF_TEST is defined.  You can use this free for any purpose.  It's in
  * the public domain.  It has no warranty.
  *
@@ -65,7 +65,7 @@ static inline u32 jhash(const void *key, u32 length, u32 initval)
 
 	/* all but the last block: affect some 32 bits of (a,b,c) */
 	while (length > 12) {
-    		a += (k[0] + ((u32)k[1]<<8) + ((u32)k[2]<<16) + ((u32)k[3]<<24));
+		a += (k[0] + ((u32)k[1]<<8) + ((u32)k[2]<<16) + ((u32)k[3]<<24));
 		b += (k[4] + ((u32)k[5]<<8) + ((u32)k[6]<<16) + ((u32)k[7]<<24));
 		c += (k[8] + ((u32)k[9]<<8) + ((u32)k[10]<<16) + ((u32)k[11]<<24));
 		__jhash_mix(a, b, c);
@@ -117,7 +117,7 @@ static inline u32 jhash2(const u32 *k, u32 length, u32 initval)
 	}
 
 	/* handle the last 3 u32's */
-	/* all the case statements fall through */ 
+	/* all the case statements fall through */
 	switch (length) {
 	case 3: c += k[2];
 	case 2: b += k[1];
@@ -155,3 +155,4 @@ static inline u32 jhash_1word(u32 a, u32 initval)
 }
 
 #endif /* _LINUX_JHASH_H */
+
