@@ -229,9 +229,9 @@ static int proc_write_val(struct file *file, const char *buffer,
 	msleep(500);
 	enable_irq(pgtsdata->client->irq);
 
-	//Éý¼¶Íê³ÉºóÐèÒª¶ÔÒ»Ð©²ÎÊýÔÙ×öÅäÖÃ
-	//ÓÈÆäÊÇ×ø±êÏµ×î´óÖµµÄÅäÖÃ£¬·ñÔò»áµ¼ÖÂÉý¼¶ºó´¥ÃþÆÁ²»¿ÉÓÃ
-	//ºóÐøÐèÒªÌí¼ÓÆäËû»úÐÍµÄÅäÖÃ
+	//å‡çº§å®ŒæˆåŽéœ€è¦å¯¹ä¸€äº›å‚æ•°å†åšé…ç½®
+	//å°¤å…¶æ˜¯åæ ‡ç³»æœ€å¤§å€¼çš„é…ç½®ï¼Œå¦åˆ™ä¼šå¯¼è‡´å‡çº§åŽè§¦æ‘¸å±ä¸å¯ç”¨
+	//åŽç»­éœ€è¦æ·»åŠ å…¶ä»–æœºåž‹çš„é…ç½®
 	ret = i2c_smbus_write_byte_data(pgtsdata->client, pgtsdata->f11.ctrl_base+2, 0x9);
 	if (ret<0) pr_err("i2c_smbus_write_byte_data failed\n");
 	ret = i2c_smbus_write_byte_data(pgtsdata->client, pgtsdata->f11.ctrl_base+3, 0x9);	
@@ -460,7 +460,7 @@ static int synaptics_rmi4_set_panel_state(
 	switch (state){
 	case TS_POWER_ON:
 		/*
-		 * ReportingMode = ¡®001¡¯: 
+		 * ReportingMode = â€˜001â€™: 
 		 * Reduced reporting mode In this mode, the absolute data
 		 * source interrupt is asserted whenever a finger arrives 
 		 * or leaves. Fingers that are present but basically 
@@ -711,6 +711,7 @@ static int synaptics_rmi4_probe(
 	ts->input_dev->phys = client->name;
 
 #ifdef TOUCHSCREEN_DUPLICATED_FILTER
+
 {
 	uint xres,yres=0;
 	get_screeninfo(&xres, &yres);
@@ -966,4 +967,3 @@ module_exit(synaptics_rmi4_exit);
 
 MODULE_DESCRIPTION("Synaptics RMI4 Driver");
 MODULE_LICENSE("GPL");
-
