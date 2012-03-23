@@ -4002,6 +4002,7 @@ static void __init msm7x2x_init(void)
 	msm_acpu_clock_init(&msm7x2x_clock_data);
 #ifdef CONFIG_ZTE_PLATFORM
 	init_usb3v3();//USB-HML-001 enable ldo.
+#endif
 #if defined( CONFIG_TOUCHSCREEN_MSM_LEGACY) || defined( CONFIG_TOUCHSCREEN_MSM)
 	msm_device_tssc.dev.platform_data = &msm_tssc_pdata;
 #endif
