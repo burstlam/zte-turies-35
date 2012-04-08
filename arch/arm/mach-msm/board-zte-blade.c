@@ -3726,7 +3726,7 @@ static struct msm_i2c_platform_data msm_i2c_pdata = {
       *
       * Set frequency of I2C clock as 100K
       */
-	.clk_freq = 400000,
+	.clk_freq = 200000,
 	.rmutex  = 0,
 	.pri_clk = 60,
 	.pri_dat = 61,
