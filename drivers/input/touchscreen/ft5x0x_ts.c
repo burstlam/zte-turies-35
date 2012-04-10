@@ -739,17 +739,17 @@ static int Fts_ts_probe(
 	set_bit(KEY_SEARCH, ts->input_dev->keybit);
 	/*ZFJ_TS_ZFJ_20110420   end*/   
 #endif	
-	set_bit(EV_SYN, ts->input_dev->evbit);
-	set_bit(EV_KEY, ts->input_dev->evbit);
-	set_bit(BTN_TOUCH, ts->input_dev->keybit);
-	set_bit(BTN_2, ts->input_dev->keybit);
+	//set_bit(EV_SYN, ts->input_dev->evbit);
+	//set_bit(EV_KEY, ts->input_dev->evbit);
+	//set_bit(BTN_TOUCH, ts->input_dev->keybit);
+	//set_bit(BTN_2, ts->input_dev->keybit);
 	set_bit(EV_ABS, ts->input_dev->evbit);
 
 
-	set_bit(KEY_HOME, ts->input_dev->keybit);
-	set_bit(KEY_MENU, ts->input_dev->keybit);
-	set_bit(KEY_BACK, ts->input_dev->keybit);
-	set_bit(KEY_SEARCH, ts->input_dev->keybit);
+	//set_bit(KEY_HOME, ts->input_dev->keybit);
+	//set_bit(KEY_MENU, ts->input_dev->keybit);
+	//set_bit(KEY_BACK, ts->input_dev->keybit);
+	//set_bit(KEY_SEARCH, ts->input_dev->keybit);
 	
 	input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
 	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, xres, 0, 0);
@@ -857,6 +857,7 @@ static const struct i2c_device_id Fts_ts_id[] = {
 };
 
 static struct i2c_driver Fts_ts_driver = {
+
 	.probe		= Fts_ts_probe,
 	.remove		= Fts_ts_remove,
 #ifndef CONFIG_HAS_EARLYSUSPEND
