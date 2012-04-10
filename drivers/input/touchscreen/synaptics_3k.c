@@ -721,13 +721,13 @@ static int synaptics_rmi4_probe(
 }
 #endif
 
-	set_bit(EV_SYN, ts->input_dev->evbit);
-	set_bit(EV_KEY, ts->input_dev->evbit);
-	set_bit(BTN_TOUCH, ts->input_dev->keybit);
+	//set_bit(EV_SYN, ts->input_dev->evbit);
+	//set_bit(EV_KEY, ts->input_dev->evbit);
+	//set_bit(BTN_TOUCH, ts->input_dev->keybit);
 	set_bit(EV_ABS, ts->input_dev->evbit);
-	set_bit(KEY_HOME, ts->input_dev->keybit);
-	set_bit(KEY_MENU, ts->input_dev->keybit);
-	set_bit(KEY_BACK, ts->input_dev->keybit);
+	//set_bit(KEY_HOME, ts->input_dev->keybit);
+	//set_bit(KEY_MENU, ts->input_dev->keybit);
+	//set_bit(KEY_BACK, ts->input_dev->keybit);
 	//set_bit(ABS_X, ts->input_dev->absbit);
 	//set_bit(ABS_Y, ts->input_dev->absbit);
 	set_bit(ABS_SINGLE_TAP, ts->input_dev->absbit);
