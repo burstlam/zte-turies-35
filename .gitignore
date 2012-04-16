@@ -84,6 +84,8 @@ scripts/mod/mk_elfconfig
 scripts/mod/modpost
 usr/gen_init_cpio
 usr/initramfs_data.cpio
+firmware/mXT140C27_v1.0.01.enc
+firmware/mXT224C23_v1.1.09.enc
 
 
 
