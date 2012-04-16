@@ -182,6 +182,42 @@ config MACH_BLADE
 	help
 	  Support for the ZTE MSM7x27 Blade phone.
 
+config MACH_BLADE2
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE BLADE2"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 Blade2 phone.
+
+config MACH_NOVA
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE NOVA"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 Nova phone.
+
+config MACH_SAILBOAT
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE SAILBOAT"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 Sailboat phone.
+
+config MACH_TURIES
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE TURIES"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 Turies phone.
+
 config MACH_BLADE_CAMERA5MP
 	depends on MACH_BLADE
 	default n
@@ -189,6 +225,123 @@ config MACH_BLADE_CAMERA5MP
 	help
 	  Support for the ZTE blade board,5MP camera.
 	  
+config MACH_MOONCAKE
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE MOONCAKE"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 mooncake phone.	
+	    
+config MACH_V9
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE V9"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 v9 phone.	
+
+config MACH_RAISE
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE RAISE"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 raise phone.
+	  
+config MACH_JOE
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE JOE"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 joe phone.	
+	  
+config MACH_R750
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE R750"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 r750 phone.		    		   	  
+
+config MACH_IBOX
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE IBOX"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 ibox phone.	
+
+config MACH_AMIGO
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE AMIGO"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 amigo phone.	
+	  
+config MACH_SMOOTH
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE SMOOTH"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 smooth phone.	  
+	  
+config MACH_JOECDMA
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE JOECDMA"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 joeCDMA phone.		  
+	  
+config MACH_RACER2
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE_RACER2"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 racer2 phone. 
+
+config MACH_SKATE
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE SKATE"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 skate phone.
+	  
+config MACH_ROAMER
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE ROAMER"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 roamer phone.	  
+	  
+config MACH_BLUETICK
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	default n
+	bool "ZTE BLUETICK"
+	select ZTE_PLATFORM
+	help
+	  Support for the ZTE MSM7x27 bluetick phone.	  
+
 # ZTE_FTM_FLAG_SUPPORT
 config ZTE_FTM_FLAG_SUPPORT
 	depends on ZTE_PLATFORM
@@ -968,9 +1121,27 @@ config MSM_CPU_FREQ_MIN
 	depends on MSM_CPU_FREQ_SET_MIN_MAX
 	default 245760
 
+config MSM_CPU_FREQ_OVERCLOCK
+	bool "Overclock the CPU frequency (ZTE Blade & v9)"
+	depends on (MACH_BLADE || MACH_V9 )
+	depends on MSM_CPU_FREQ_SET_MIN_MAX
+	default n
+	help
+	  Adds a number of overclocked frequencies for the 600MHz ZTE Blade and ZTE V9/Light.
+	  If unsure, choose N.
+
+config MSM_CPU_FREQ_OVERCLOCK_800
+	bool "Overclock the CPU frequency (ZTE Skate)"
+	depends on MACH_SKATE
+	depends on MSM_CPU_FREQ_SET_MIN_MAX
+	default n
+	help
+	  Adds a number of overclocked frequencies for the 800MHz ZTE Skate.
+	  If unsure, choose N.
+
 config MSM_CPU_FREQ_OVERCLOCK_AHB
-	bool "Overclock the AHB-bus with 50% for all frequencies from 480MHz and above."
-	depends on MACH_BLADE
+	bool "Overclock the AHB-bus with 50% for all frequencies from 400MHz and above."
+	depends on (MACH_BLADE || MACH_V9 || MACH_SKATE)
 	default n
 	help
 	  Increases the speed of memory read/writes but can cause instability.
@@ -1305,4 +1476,115 @@ config MSM_SLEEP_STATS
 	bool "Enable exporting of MSM sleep stats to userspace"
 	depends on CPU_IDLE
 	default n
+
+config MSM_STANDALONE_POWER_COLLAPSE
+       bool "Enable standalone power collapse"
+       default n
+
+config MSM_GSBI9_UART
+	bool "Enable GSBI9 UART device"
+	default n
+	help
+	  This enables GSBI9 configured into UART.
+
+config MSM_SHARED_GPIO_FOR_UART2DM
+	bool "Use shared GPIOs into UART mode"
+	depends on (ARCH_MSM7X27A && !MMC_MSM_SDC3_8_BIT_SUPPORT && !MMC_MSM_SDC4_SUPPORT)
+	help
+	  This option configures GPIO muxed with SDC4/MMC3
+	  8-bit mode into UART mode. It is used for serial
+	  console on UART2DM. Say Y if you want to have
+	  serial console on UART2DM.
+
+config MSM_SHOW_RESUME_IRQ
+	bool "Enable logging of interrupts that could have caused resume"
+	depends on (ARCH_MSM8X60 || ARCH_MSM8960 || ARCH_MSMCOPPER)
+	default n
+	help
+		This option logs wake up interrupts that have triggered just before
+		the resume loop unrolls. Say Y if you want to debug why the system
+		resumed.
+
+config BT_MSM_PINTEST
+	tristate "MSM Bluetooth Pin Connectivity Test"
+	depends on ((ARCH_MSM8X60 || ARCH_MSM7X27A) && DEBUG_FS)
+        default n
+	help
+	  Bluetooth MSM Pin Connectivity test module.
+	  This driver provides support for verifying the MSM to BT pin
+	  connectivity.
+
+config MSM_FAKE_BATTERY
+		depends on POWER_SUPPLY
+		default n
+		bool "MSM Fake Battery"
+		help
+		 Enables MSM fake battery driver.
+
+config MSM_QDSP6_APR
+	bool "Audio QDSP6 APR support"
+	depends on MSM_SMD
+	default n
+	help
+	  Enable APR IPC protocol support between
+	  application processor and QDSP6. APR is
+	  used by audio driver to configure QDSP6's
+	  ASM, ADM and AFE.
+
+
+config MSM_AUDIO_QDSP6
+        bool "QDSP6 HW Audio support"
+        select SND_SOC_MSM_QDSP6_INTF
+        default n
+        help
+          Enable HW audio support in QDSP6.
+          QDSP6 can support HW encoder & decoder and audio processing
+
+config MSM_RPC_VIBRATOR
+	bool "RPC based MSM Vibrator Support"
+	depends on MSM_ONCRPCROUTER
+	help
+	  Enable the vibrator support on MSM over RPC. The vibrator
+	  is connected on the PMIC. Say Y if you want to enable this
+	  feature.
+
+config PM8XXX_RPC_VIBRATOR
+	bool "RPC based Vibrator on PM8xxx PMICs"
+	depends on MSM_RPC_VIBRATOR
+	help
+	  Enable the vibrator support on MSM over RPC. The vibrator
+	  is connected on the PM8XXX PMIC. Say Y if you want to enable
+	  this feature.
+
+config MSM_SPM_V1
+	bool "Driver support for SPM Version 1"
+	help
+	  Enables the support for Version 1 of the SPM driver. SPM hardware is
+	  used to manage the processor power during sleep. The driver allows
+	  configuring SPM to allow different power modes.
+
+config MSM_SPM_V2
+	bool "Driver support for SPM Version 2"
+	help
+	  Enables the support for Version 2 of the SPM driver. SPM hardware is
+	  used to manage the processor power during sleep. The driver allows
+	  configuring SPM to allow different power modes.
+
+config MSM_L2_SPM
+	bool "SPM support for L2 cache"
+	depends on MSM_SPM_V2
+	help
+	  Enable SPM driver support for L2 cache. Some MSM chipsets allow
+	  control of L2 cache low power mode with a Subsystem Power manager.
+	  Enabling this driver allows configuring L2 SPM for low power modes
+	  on supported chipsets.
+
+config MSM_MULTIMEDIA_USE_ION
+	bool "Multimedia suport using Ion"
+	depends on ION_MSM
+	help
+	  Enable support for multimedia drivers using Ion for buffer management
+	  instead of pmem. Selecting this may also involve userspace
+	  dependencies as well.
+
 endif
