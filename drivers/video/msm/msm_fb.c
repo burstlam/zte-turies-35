@@ -181,6 +181,9 @@ int msm_fb_cursor(struct fb_info *info, struct fb_cursor *cursor)
 
 static int msm_fb_resource_initialized;
 
+static int unset_bl_level, bl_updated;
+static int bl_level_old;
+
 #ifndef CONFIG_FB_BACKLIGHT
 static int lcd_backlight_registered;
 
@@ -200,6 +203,9 @@ static void msm_fb_set_bl_brightness(struct led_classdev *led_cdev,
 
 	if (!bl_lvl && value)
 		bl_lvl = 1;
+
+	if (bl_level_old != bl_lvl)
+		bl_updated = TRUE;
 
 	msm_fb_set_backlight(mfd, bl_lvl);
 }
@@ -740,14 +746,11 @@ static void msmfb_early_resume(struct early_suspend *h)
 }
 #endif
 
-static int unset_bl_level, bl_updated;
-static int bl_level_old;
-
 void msm_fb_set_backlight(struct msm_fb_data_type *mfd, __u32 bkl_lvl)
 {
 	struct msm_fb_panel_data *pdata;
 
-	if (!mfd->panel_power_on || !bl_updated) {
+	if (!bl_updated) {
 		unset_bl_level = bkl_lvl;
 		return;
 	} else {
@@ -758,7 +761,7 @@ void msm_fb_set_backlight(struct msm_fb_data_type *mfd, __u32 bkl_lvl)
 
 	if ((pdata) && (pdata->set_backlight)) {
 		down(&mfd->sem);
-		if (bl_level_old == bkl_lvl) {
+		if (bl_level_old == bkl_lvl && !bl_updated) {
 			up(&mfd->sem);
 			return;
 		}
@@ -821,6 +824,7 @@ static int msm_fb_blank_sub(int blank_mode, struct fb_info *info,
 
 			mfd->op_enable = FALSE;
 			curr_pwr_state = mfd->panel_power_on;
+
 			msm_fb_set_backlight(mfd, 0);		///ZTE_LCD_LUYA_20100201_001
 			mfd->panel_power_on = FALSE;
 			bl_updated = 0;
@@ -1547,7 +1551,7 @@ static int msm_fb_pan_display(struct fb_var_screeninfo *var,
 
 	down(&msm_fb_pan_sem);
 
-	if (info->node == 0 && !(mfd->cont_splash_done)) { /* primary */
+	if (info->node == 0) { /* primary */
 		mdp_set_dma_pan_info(info, NULL, TRUE);
 		if (msm_fb_blank_sub(FB_BLANK_UNBLANK, info, mfd->op_enable)) {
 			pr_err("%s: can't turn on display!\n", __func__);
@@ -2662,7 +2666,7 @@ static int msmfb_overlay_play(struct fb_info *info, unsigned long *argp)
 	add_timer(&mfd->msmfb_no_update_notify_timer);
 	mutex_unlock(&msm_fb_notify_update_sem);
 
-	if (info->node == 0 && !(mfd->cont_splash_done)) { /* primary */
+	if (info->node == 0) { /* primary */
 		mdp_set_dma_pan_info(info, NULL, TRUE);
 		if (msm_fb_blank_sub(FB_BLANK_UNBLANK, info, mfd->op_enable)) {
 			pr_err("%s: can't turn on display!\n", __func__);
