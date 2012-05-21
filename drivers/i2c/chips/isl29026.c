@@ -28,6 +28,7 @@ Wenn               Wer          Was                                             
 #include <linux/i2c/PS_ALS_common.h>
 #include <linux/input.h>
 #include <linux/miscdevice.h>
+#include <linux/wakelock.h>
 
 
 #define ISL_INT_GPIO 42
@@ -117,7 +118,8 @@ static int ISL_prox_poll(struct PS_ALS_prox_info *prxp);
 static void do_ISL_work(struct work_struct *w);
 static void ISL_report_value(int mask);
 static int calc_distance(int value);
-static int enable_light_and_proximity(int mask);	
+static int enable_light_and_proximity(int mask);
+static struct wake_lock isl_wake_lock;	
 static int light_on=0;  
 static int prox_on = 0;
 
@@ -225,8 +227,16 @@ static u16 gain_trim_param = 100;
 static u16 gain_trim_param = 25; //this value is set according to specific device
 #endif
 
+#if defined(CONFIG_MACH_BLADE)
+static u16 prox_threshold_hi_param = 600;
+static u16 prox_threshold_lo_param = 500;
+#elif defined(CONFIG_MACH_SKATE)
+static u16 prox_threshold_hi_param = 600;
+static u16 prox_threshold_lo_param = 500;
+#else
 static u16 prox_threshold_hi_param = 1023; 
 static u16 prox_threshold_lo_param = 818;
+#endif
 static u8 prox_int_time_param = 0xF6;
 static u8 prox_adc_time_param = 0xFF;
 static u8 prox_wait_time_param = 0xFF;
@@ -492,6 +502,7 @@ static int __init ISL_init(void) {
 		printk(KERN_ERR "ISL: i2c_add_driver() failed in ISL_init(),%d\n",ret);
                 return (ret);
 	}
+        wake_lock_init(&isl_wake_lock, WAKE_LOCK_SUSPEND, "isl");
     	//pr_crit(ISL_TAG "%s:%d\n",__func__,ret);
         return (ret);
 }
@@ -928,6 +939,10 @@ static int enable_light_and_proximity(int mask)
 			printk(KERN_ERR "ISL: i2c_smbus_write_byte_data failed in ioctl prox_on\n");
             return (ret);
 		}
+            // Use wake lock to stop suspending during calls.
+                wake_lock(&isl_wake_lock);
+                pr_crit(ISL_TAG "get wake lock");
+            return ret;
 	}	
 	if(mask==0x20) /*20 : light off*/
 	{
@@ -990,6 +1005,9 @@ static int enable_light_and_proximity(int mask)
 			printk(KERN_ERR "ISL: i2c_smbus_write_byte_data failed in ioctl prox_on\n");
             return (ret);
         }
+        wake_unlock(&isl_wake_lock);
+                pr_crit(ISL_TAG "release wake lock");
+        return ret;
 	}
 	return ret;
 }
@@ -1273,4 +1291,3 @@ MODULE_LICENSE("GPL");
 
 module_init(ISL_init);
 module_exit(ISL_exit);
-
